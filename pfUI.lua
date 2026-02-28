@@ -201,8 +201,10 @@ function pfUI:UpdateFonts()
   MailTextFontNormal:SetFont(default, 15)
   SubSpellFont:SetFont(default, 12)
   DialogButtonNormalText:SetFont(default, 16)
-  ZoneTextFont:SetFont(default, 34, "OUTLINE")
-  SubZoneTextFont:SetFont(default, 24, "OUTLINE")
+  if pfUI_config.global.font_blizzard_zone ~= "1" then
+    ZoneTextFont:SetFont(default, 34, "OUTLINE")
+    SubZoneTextFont:SetFont(default, 24, "OUTLINE")
+  end
   GameTooltipText:SetFont(tooltip, pfUI_config.tooltip.font_tooltip_size)
   GameTooltipTextSmall:SetFont(tooltip, pfUI_config.tooltip.font_tooltip_size)
   GameTooltipHeaderText:SetFont(tooltip, pfUI_config.tooltip.font_tooltip_size + 1)

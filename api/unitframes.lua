@@ -1511,6 +1511,7 @@ function pfUI.uf:RefreshUnit(unit, component)
   -- buffs
   if unit.buffs and ( component == "all" or component == "aura" ) then
     local texture, stacks
+    local selfbuff = unit.config.selfbuff
 
     for i=1, unit.config.bufflimit do
       if not unit.buffs[i] then break end
@@ -1518,6 +1519,8 @@ function pfUI.uf:RefreshUnit(unit, component)
       if unit.label == "player" then
         stacks = GetPlayerBuffApplications(GetPlayerBuff(PLAYER_BUFF_START_ID+i,"HELPFUL"))
         texture = GetPlayerBuffTexture(GetPlayerBuff(PLAYER_BUFF_START_ID+i,"HELPFUL"))
+      elseif selfbuff == "1" then
+        texture, stacks = pfUI.uf:UnitClassBuff(unitstr, i)
       else
         texture, stacks = pfUI.uf:DetectBuff(unitstr, i)
       end
@@ -2228,6 +2231,123 @@ function pfUI.uf:HideIcon(frame, pos)
   if frame.icon and frame.icon[pos] then
     frame.icon[pos]:Hide()
   end
+end
+
+local classbuff_icons = nil
+function pfUI.uf:GetClassBuffIcons()
+  if classbuff_icons then return classbuff_icons end
+
+  local _, myclass = UnitClass("player")
+  classbuff_icons = {}
+
+  if myclass == "DRUID" then
+    classbuff_icons["interface\\icons\\spell_nature_regeneration"] = true -- Mark of the Wild
+    classbuff_icons["interface\\icons\\spell_nature_giftofthewild"] = true -- Gift of the Wild
+    classbuff_icons["interface\\icons\\spell_nature_thorns"] = true -- Thorns
+    classbuff_icons["interface\\icons\\spell_nature_resistnature"] = true -- Regrowth
+    classbuff_icons["interface\\icons\\spell_nature_rejuvenation"] = true -- Rejuvenation
+    classbuff_icons["interface\\icons\\inv_misc_herb_felblossom"] = true -- Lifebloom
+    classbuff_icons["interface\\icons\\spell_nature_lightning"] = true -- Innervate
+  end
+
+  if myclass == "PRIEST" then
+    classbuff_icons["interface\\icons\\spell_holy_wordfortitude"] = true -- Power Word: Fortitude
+    classbuff_icons["interface\\icons\\spell_holy_prayeroffortitude"] = true -- Prayer of Fortitude
+    classbuff_icons["interface\\icons\\spell_holy_divinespirit"] = true -- Divine Spirit
+    classbuff_icons["interface\\icons\\spell_holy_prayerofspirit"] = true -- Prayer of Spirit
+    classbuff_icons["interface\\icons\\spell_shadow_antishadow"] = true -- Shadow Protection
+    classbuff_icons["interface\\icons\\spell_holy_prayerofshadowprotection"] = true -- Prayer of Shadow Protection
+    classbuff_icons["interface\\icons\\spell_holy_excorcism"] = true -- Fear Ward
+    classbuff_icons["interface\\icons\\spell_holy_renew"] = true -- Renew
+    classbuff_icons["interface\\icons\\spell_holy_powerwordshield"] = true -- Power Word: Shield
+    classbuff_icons["interface\\icons\\spell_holy_prayerofmendingtga"] = true -- Prayer of Mending (TBC)
+    classbuff_icons["interface\\icons\\spell_holy_powerinfusion"] = true -- Power Infusion
+  end
+
+  if myclass == "PALADIN" then
+    classbuff_icons["interface\\icons\\spell_holy_greaterblessingofsalvation"] = true -- Greater Blessing of Salvation
+    classbuff_icons["interface\\icons\\spell_holy_sealofsalvation"] = true -- Blessing of Salvation
+    classbuff_icons["interface\\icons\\spell_holy_sealofwisdom"] = true -- Blessing of Wisdom
+    classbuff_icons["interface\\icons\\spell_holy_greaterblessingofwisdom"] = true -- Greater Blessing of Wisdom
+    classbuff_icons["interface\\icons\\spell_nature_lightningshield"] = true -- Blessing of Sanctuary
+    classbuff_icons["interface\\icons\\spell_holy_greaterblessingofsanctuary"] = true -- Greater Blessing of Sanctuary
+    classbuff_icons["interface\\icons\\spell_magic_magearmor"] = true -- Blessing of Kings
+    classbuff_icons["interface\\icons\\spell_magic_greaterblessingofkings"] = true -- Greater Blessing of Kings
+    classbuff_icons["interface\\icons\\spell_holy_fistofjustice"] = true -- Blessing of Might
+    classbuff_icons["interface\\icons\\spell_holy_greaterblessingofkings"] = true -- Greater Blessing of Might
+    classbuff_icons["interface\\icons\\spell_holy_prayerofhealing02"] = true -- Blessing of Light
+    classbuff_icons["interface\\icons\\spell_holy_greaterblessingoflight"] = true -- Greater Blessing of Light
+    classbuff_icons["interface\\icons\\spell_holy_sealofsacrifice"] = true -- Blessing of Sacrifice
+    classbuff_icons["interface\\icons\\spell_holy_sealofvalor"] = true -- Blessing of Freedom
+    classbuff_icons["interface\\icons\\spell_holy_sealofprotection"] = true -- Blessing of Protection
+  end
+
+  if myclass == "WARLOCK" then
+    classbuff_icons["interface\\icons\\spell_fire_firearmor"] = true -- Fire Shield
+    classbuff_icons["interface\\icons\\spell_shadow_bloodboil"] = true -- Blood Pact
+    classbuff_icons["interface\\icons\\spell_shadow_soulgem"] = true -- Soulstone
+    classbuff_icons["interface\\icons\\spell_shadow_demonbreath"] = true -- Unending Breath
+    classbuff_icons["interface\\icons\\spell_shadow_detectinvisibility"] = true -- Detect Invisibility
+    classbuff_icons["interface\\icons\\spell_shadow_detectlesserinvisibility"] = true -- Detect Lesser Invisibility
+    classbuff_icons["interface\\icons\\spell_shadow_auradarkness"] = true -- Paranoia
+  end
+
+  if myclass == "WARRIOR" then
+    classbuff_icons["interface\\icons\\ability_warrior_battleshout"] = true -- Battle Shout
+    classbuff_icons["interface\\icons\\ability_warrior_rallyingcry"] = true -- Commanding Shout (TBC)
+  end
+
+  if myclass == "MAGE" then
+    classbuff_icons["interface\\icons\\spell_holy_magicalsentry"] = true -- Arcane Brilliance
+    classbuff_icons["interface\\icons\\spell_holy_arcaneintellect"] = true -- Arcane Intellect
+    classbuff_icons["interface\\icons\\spell_nature_abolishmagic"] = true -- Dampen Magic
+    classbuff_icons["interface\\icons\\spell_holy_flashheal"] = true -- Amplify Magic
+  end
+
+  if myclass == "HUNTER" then
+    classbuff_icons["interface\\icons\\spell_nature_protectionformnature"] = true -- Aspect of the Wild
+    classbuff_icons["interface\\icons\\ability_mount_whitetiger"] = true -- Aspect of the Pack
+    classbuff_icons["interface\\icons\\ability_hunter_misdirection"] = true -- Misdirection (TBC)
+  end
+
+  if myclass == "SHAMAN" then
+    classbuff_icons["interface\\icons\\spell_nature_skinofearth"] = true -- Earth Shield (TBC)
+    classbuff_icons["interface\\icons\\spell_nature_earthbindtotem"] = true -- Strength of Earth Totem
+    classbuff_icons["interface\\icons\\spell_nature_stoneskintotem"] = true -- Stoneskin Totem
+    classbuff_icons["interface\\icons\\spell_nature_manaregentotem"] = true -- Mana Spring Totem
+    classbuff_icons["interface\\icons\\spell_frost_summonwaterelemental"] = true -- Mana Tide Totem
+    classbuff_icons["interface\\icons\\inv_spear_04"] = true -- Healing Stream Totem
+    classbuff_icons["interface\\icons\\spell_nature_brilliance"] = true -- Tranquil Air Totem
+    classbuff_icons["interface\\icons\\spell_nature_invisibilitytotem"] = true -- Grace of Air Totem
+    classbuff_icons["interface\\icons\\spell_nature_groundingtotem"] = true -- Grounding Totem
+    classbuff_icons["interface\\icons\\spell_nature_natureresistancetotem"] = true -- Nature Resistance Totem
+    classbuff_icons["interface\\icons\\spell_fireresistancetotem_01"] = true -- Fire Resistance Totem
+    classbuff_icons["interface\\icons\\spell_frostresistancetotem_01"] = true -- Frost Resistance Totem
+    classbuff_icons["interface\\icons\\spell_nature_undyingstrength"] = true -- Ancestral Fortitude
+    classbuff_icons["interface\\icons\\spell_nature_healingway"] = true -- Healing Way
+    classbuff_icons["interface\\icons\\spell_nature_windfury"] = true -- Windfury Totem
+  end
+
+  return classbuff_icons
+end
+
+function pfUI.uf:UnitClassBuff(unitstr, id)
+  local icons = pfUI.uf:GetClassBuffIcons()
+  local count = 0
+
+  for i=1, 32 do
+    local texture, stacks = pfUI.uf:DetectBuff(unitstr, i)
+    if not texture then return nil end
+
+    if icons[string.lower(texture)] then
+      count = count + 1
+      if count == id then
+        return texture, stacks
+      end
+    end
+  end
+
+  return nil
 end
 
 function pfUI.uf:SetupDebuffFilter(allclasses)

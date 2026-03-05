@@ -544,6 +544,7 @@ pfUI_translation["enUS"] = {
   ["Only Count Bagspace On Regular Bags"] = nil,
   ["Only Show Chat Dock On Mouseover"] = nil,
   ["Only Show On Mouse Over"] = nil,
+  ["Only Show Own Buffs (|cffffaaaaExperimental|r)"] = nil,
   ["Only Show Own Debuffs (|cffffaaaaExperimental|r)"] = nil,
   ["Only Show Target Castbar"] = nil,
   ["On State Change"] = nil,

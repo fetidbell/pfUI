@@ -51,7 +51,8 @@ local function BuffOnUpdate()
 end
 
 local function TargetBuffOnUpdate()
-  local name, rank, icon, count, duration, timeleft = _G.UnitBuff("target", this.id)
+  local buffid = this.realid or this.id
+  local name, rank, icon, count, duration, timeleft = _G.UnitBuff("target", buffid)
   if duration and timeleft then
     CooldownFrame_SetTimer(this.cd, GetTime() + timeleft - duration, duration, 1)
   else
@@ -63,15 +64,16 @@ local function BuffOnEnter()
   local parent = this:GetParent()
   if not parent.label then return end
 
+  local buffid = this.realid or this.id
   GameTooltip:SetOwner(this, "ANCHOR_BOTTOMRIGHT")
   if parent.label == "player" then
     GameTooltip:SetPlayerBuff(GetPlayerBuff(PLAYER_BUFF_START_ID+this.id,"HELPFUL"))
   else
-    GameTooltip:SetUnitBuff(parent.label .. parent.id, this.id)
+    GameTooltip:SetUnitBuff(parent.label .. parent.id, buffid)
   end
 
   if IsShiftKeyDown() then
-    local texture = parent.label == "player" and GetPlayerBuffTexture(GetPlayerBuff(PLAYER_BUFF_START_ID+this.id,"HELPFUL")) or UnitBuff(parent.label .. parent.id, this.id)
+    local texture = parent.label == "player" and GetPlayerBuffTexture(GetPlayerBuff(PLAYER_BUFF_START_ID+this.id,"HELPFUL")) or UnitBuff(parent.label .. parent.id, buffid)
 
     local playerlist = ""
     local first = true
@@ -1519,10 +1521,14 @@ function pfUI.uf:RefreshUnit(unit, component)
       if unit.label == "player" then
         stacks = GetPlayerBuffApplications(GetPlayerBuff(PLAYER_BUFF_START_ID+i,"HELPFUL"))
         texture = GetPlayerBuffTexture(GetPlayerBuff(PLAYER_BUFF_START_ID+i,"HELPFUL"))
+        unit.buffs[i].realid = nil
       elseif selfbuff == "1" then
-        texture, stacks = pfUI.uf:UnitClassBuff(unitstr, i)
+        local realid
+        texture, stacks, realid = pfUI.uf:UnitClassBuff(unitstr, i)
+        unit.buffs[i].realid = realid
       else
         texture, stacks = pfUI.uf:DetectBuff(unitstr, i)
+        unit.buffs[i].realid = nil
       end
 
       unit.buffs[i].texture:SetTexture(texture)
@@ -2342,7 +2348,7 @@ function pfUI.uf:UnitClassBuff(unitstr, id)
     if icons[string.lower(texture)] then
       count = count + 1
       if count == id then
-        return texture, stacks
+        return texture, stacks, i
       end
     end
   end
